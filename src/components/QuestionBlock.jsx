@@ -1,45 +1,68 @@
 /* eslint react/prop-types: 0 */
 import { useState } from 'react'
 import Button from './Button.jsx'
+import { setSessionStorage } from './storage'
 
-function QuestionBlock(props) {
+function QuestionBlock({ apiData, submitted }) {
 
     const [selectedOption, setSelectedOption] = useState(null);
-    let score = 0
+
     function selectOption(event) {
         setSelectedOption(event.target.dataset.option);
-        if (selectedOption === props.correct_answer) {
-            score += 1
-            props.incrementScore(score)
-        }
+        setSessionStorage('answers', {[apiData.id]: event.target.dataset.option})
     }
 
-
-    const answersElement = props.answers.map((element) => {
+    if (submitted === true) {
         return (
-            <div key={element}>
-                <Button 
-                    key={element}
-                    text={element}
-                    data-option={element}
-                    onClick={selectOption}
-                    className={`${selectedOption === element ? 'selected' : ''}`}
-                    submitted={props.submitted}
-                    correct_answer={props.correct_answer}
-                    selectedOption={selectedOption}
-                    />
-                    
-            </div>
-        )
-    })
-    return (
+            <div className='main-container'>
+                <h5 className='question-text'>{apiData.question}</h5>
+                <div className="possible-questions-div option-container">
+                        {apiData.options.map((element) => {
+                            
+                            let newClassName = ''
+                            if (selectedOption === element) {
+                                if (element === apiData.correct_answer) {
+                                    newClassName = "correct"
+                                }
+                                else {
+                                    newClassName = 'wrong'
+                                }
+                            }
+                            else {
+                                if (element === apiData.correct_answer) {
+                                    newClassName = 'correct-answer'
+                                }
+                                else {
+                                    newClassName = ''
+                                }
+                                
+                            }   
+                            
+                            return (
+                                <Button 
+                                    key={element}
+                                    text={element}
+                                    className={`${newClassName}`}
+                                /> )})}
+                </div>
+            </div>)}
+    else {
+        return(
         <div className='main-container'>
-            <h5 className='question-text'>{props.question}</h5>
+            <h5 className='question-text'>{apiData.question}</h5>
             <div className="possible-questions-div option-container">
-                {answersElement}
+                {apiData.options.map((element) => {
+                    return(
+                        <Button 
+                            key={element}
+                            text={element}
+                            data-option={element}
+                            onClick={selectOption}
+                            className={`${selectedOption === element ? 'selected' : ''}`}
+                        />
+                    )})}
             </div>
-        </div>
-    )
+        </div>)}
 }
 
 export default QuestionBlock
